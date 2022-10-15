@@ -9,9 +9,8 @@ if(empty($_POST['facility_type'])  ) {
     header('Location: ' . $url , true, 301);
     exit();
 }
-?>
+if(!isset($_POST['pdf'])) {
 
-<?php
 $facility_type = $_POST['facility_type'];
 $record = $_POST['record'];
 $nurse_call = $_POST['nurse_call'];
@@ -217,6 +216,29 @@ $price_table = array(
         }
 
         $_SESSION['sim_data'] = serialize($sim_data);
+}
+
+        /*
+         * PDF作成
+         */
+        if(isset($_POST['pdf'])) {
+
+            $company_name = null;
+            if (isset($_POST['company_name'])) {
+                $company_name = $_POST['company_name'];
+                error_log("見積り依頼[".$company_name."]");
+            }
+
+            require_once(dirname(__FILE__).'/dto/sim_data.php');
+            $sim_data = unserialize($_SESSION['sim_data']);
+            error_log("create pdf");
+            require_once 'module/pdf.php';
+            $admin = new pdf();
+            $admin->create_pdf($sim_data, $company_name);
+        }else{
+            error_log("not create pdf");
+        }
+
 ?>
 
 <?php get_header(); ?>
@@ -240,8 +262,6 @@ $price_table = array(
         <p>お客様の概算見積は以下のとおりです。<br>詳しい見積については「お問合せフォーム」よりお問い合わせください。</p>
     </div>
         <div>
-            <?php
-            ?>
             <div class="price_list">
                 <div class="title">
                     <span class="title_reco">おすすめのシステム</span>
@@ -324,36 +344,24 @@ $price_table = array(
         </div>
 
         <div class="dl_wrapper d-flex flex-row justify-content-around">
-            <div class="sim_button_block">
-                <button type="button" class="btn_back" onclick="history.back()">もう一度やり直す</button>
-                <button data-remodal-target="modal01" rel="noopener noreferrer" type="button" class="btn_calc">詳しいお見積り</button>
-                <!--
-                <button type="button" class="btn_calc" onclick="window.open('https://business.form-mailer.jp/fms/8e5bae40179867','_new')" >詳しいお見積り</button>
-                -->
-            </div> <!-- sim_block_sub -->
+            <form action="" method="post"  name="f">
+                <div class="sim_button_block">
+                    <button type="button" class="btn_back" onclick="history.back()">もう一度やり直す</button>
+                    <input type="hidden" name="facility_type" value="<?php echo $facility_type; ?>" >
+                    <input type="hidden" name="record" value="<?php echo $record; ?>" >
+                    <input type="hidden" name="nurse_call" value="<?php echo $nurse_call; ?>" >
+                    <input type="hidden" name="care" value="<?php echo $care; ?>" >
+                    <input type="hidden" name="facility_pc_num" value="<?php echo $facility_pc_num; ?>" >
+                    <input type="hidden" name="client_pc_num" value="<?php echo $client_pc_num; ?>" >
+                    <input type="hidden" name="pc_num" value="<?php echo $pc_num; ?>" >
+                    <input type=hidden name="company_name">
+                    <button class="btn_calc" type="submit" name="pdf" onclick="return f.company_name.value=prompt('貴社名を入力してください')">お見積り書作成</button>
+                    <a href="https://business.form-mailer.jp/fms/9b83c954179866" target="_new" class="btn_calc">詳しいお見積り</a>
+                </div> <!-- sim_block_sub -->
+            </form>
         </div> <!-- price_list -->
     </div>
 </section>
 </main>
-
-<div class="remodal" data-remodal-id="modal01" data-remodal-options="hashTracking:false">
-    <h1><bold>お問い合わせ確認</bold></h1>
-    <br />
-    <font size=4>
-    <div align="left">
-        ご登録いただいた個人情報は、COMRESについてのお問い合せに回答するためだけに利用します。<br />
-        同意していただける場合は、下記ボタンをクリックしてください。
-    </div>
-    </font>
-    <br />
-    <br />
-    <table>
-        <tr>
-          <td width="500"><button data-remodal-action="cancel" class="remodal-confirm">　同意しない　</button></td>
-          <td width="500"><button data-remodal-action="confirm" class="remodal-confirm" onClick="popup_confirm01();">　同意する　</button></td>
-        </tr>
-    </table>
-</div>
-
 
 <?php get_footer(); ?>

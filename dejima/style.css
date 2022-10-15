@@ -469,6 +469,22 @@ section.home-section-fluid-wrapper {
 .case-outline p {
     width: 48%;
 }
+@media (max-width: 992px) {
+    .case-outline {
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+    }
+    .case-outline img {
+        width: 100%;
+        object-fit: contain;
+        margin: 0 auto;
+    }
+    .case-outline p {
+        width: 100%;
+        margin: 0 auto;
+    }
+}
 
 .case-outline a::after{
   content: "";
